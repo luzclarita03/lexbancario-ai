@@ -130,6 +130,14 @@ inserción mejora por batching.
 
 ## 4. Análisis — Ley de Amdahl y cuellos de botella
 
+![Speedup S_p = T_1/T_p](resultados/speedup.png)
+
+![Eficiencia E_p = S_p/p](resultados/eficiencia.png)
+
+![Desglose porcentual por fase](resultados/desglose_fases.png)
+
+![Speedup por fase](resultados/speedup_fases.png)
+
 Sea `f` la fracción no paralelizable del pipeline. El mejor speedup posible es
 `S(p) = 1 / (f + (1-f)/p)`. En este pipeline:
 
@@ -166,5 +174,7 @@ python scripts/test_aislamiento.py             # PASS esperado
 python benchmark.py --embed-mode api --workers 1,2,4,8 --reps 3   # cuota API
 python benchmark.py --embed-mode cache --workers 1,2,4,8          # repetible sin API
 python benchmark.py --embed-mode mock  --workers 1,2,4,8          # sin cuota
+python scripts/graficar.py                     # genera resultados/*.png
+python scripts/generar_informe.py              # genera INFORME_RENDIMIENTO.pdf (5 pág.)
 ```
-Resultados crudos: `resultados/benchmark_<fecha>.json` y `.csv`.
+Resultados crudos: `resultados/benchmark_<fecha>.json` y `.csv`. Informe final: `INFORME_RENDIMIENTO.pdf`.

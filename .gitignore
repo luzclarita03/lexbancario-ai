@@ -24,3 +24,6 @@ documentos_u/
 
 # Resultados de benchmarks
 resultados/
+
+# El informe PDF sí es entregable
+!INFORME_RENDIMIENTO.pdf

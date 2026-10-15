@@ -103,6 +103,9 @@ y `.csv` listos para el informe.
 - `scripts/query_rag.py`: `python scripts/query_rag.py <coleccion_id> "<pregunta>"`.
 - `scripts/apply_schema.py`: aplica el DDL por conexión directa Postgres.
 - `scripts/test_aislamiento.py`: prueba de cero contaminación cruzada.
+- `scripts/graficar.py`: genera `resultados/speedup.png`, `eficiencia.png`,
+  `desglose_fases.png` y `speedup_fases.png` a partir del JSON del benchmark.
+- `scripts/generar_informe.py`: genera `INFORME_RENDIMIENTO.pdf` (máx. 5 páginas).
 
 ## Estructura
 ```
@@ -112,5 +115,8 @@ benchmark.py                Benchmark secuencial vs paralelo
 app_streamlit.py            Frontend
 scripts/setup_database.sql  DDL: tabla, índices y RPC PL/pgSQL
 scripts/test_aislamiento.py Prueba de cero contaminación cruzada
+scripts/graficar.py         Gráficas de speedup/eficiencia/fases
+scripts/generar_informe.py  Genera el informe PDF (5 páginas)
+INFORME_RENDIMIENTO.md/.pdf Informe de rendimiento
 Dockerfile / docker-compose.yml
 ```

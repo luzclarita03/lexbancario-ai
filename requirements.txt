@@ -26,3 +26,7 @@ streamlit==1.49.1
 
 # Utilidades (aplicar esquema por conexión directa)
 psycopg[binary]==3.2.12
+
+# Reporte (gráficas + informe PDF)
+matplotlib==3.10.6
+fpdf2==2.8.4
