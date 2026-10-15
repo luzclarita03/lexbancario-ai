@@ -20,7 +20,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
 
 MODEL_EMBEDDING = "models/gemini-embedding-001"
-BATCH_SIZE = 10  # Tamaño seguro para evitar saturación de TPM
+COLECCION_ID = os.getenv("COLECCION_DEFECTO", "bancaria_asfi_bolivia")
+BATCH_SIZE = 3  # Tamaño seguro para evitar saturación de TPM
 
 def extraer_texto_pdf(ruta_pdf):
     doc = pymupdf.open(ruta_pdf)
@@ -110,12 +111,13 @@ def generar_embeddings_con_reintento(textos):
             err_str = str(e)
             if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
                 intentos_rate_limit += 1
-                if intentos_rate_limit > 3:
+                if intentos_rate_limit > 6:
                     print("\n[!] Se superó el límite diario de la API en este proyecto.")
                     print("    Genera una nueva API Key en otro proyecto de AI Studio para continuar.")
                     sys.exit(1)
-                print("\n    [!] Pausa por límite de peticiones por minuto. Esperando 40 seg...")
-                time.sleep(40)
+                espera = 45 * intentos_rate_limit
+                print(f"\n    [!] Pausa por límite de peticiones por minuto. Esperando {espera} seg...")
+                time.sleep(espera)
             else:
                 print(f"    [X] Error: {e}")
                 raise e
@@ -166,6 +168,7 @@ def procesar_directorio():
                     "jerarquia": item["jerarquia"],
                     "articulo_ref": item["articulo_ref"],
                     "contenido": item["contenido"],
+                    "coleccion_id": COLECCION_ID,
                     "embedding": vec
                 })
             

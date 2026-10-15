@@ -21,3 +21,6 @@ documentos_u/
 *.log
 .DS_Store
 .vscode/
+
+# Resultados de benchmarks
+resultados/

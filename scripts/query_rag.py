@@ -15,10 +15,10 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
 
 MODEL_EMBEDDING = "models/gemini-embedding-001"
-MODEL_GENERACION = "gemini-2.5-flash"
+MODEL_GENERACION = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
-def buscar_contexto(pregunta: str, top_k: int = 4):
-    """Genera el embedding de la consulta y llama a la función RPC en Supabase."""
+def buscar_contexto(pregunta: str, coleccion_id: str, top_k: int = 4):
+    """Genera el embedding de la consulta y llama a la RPC filtrada por colección."""
     res_emb = ai_client.models.embed_content(
         model=MODEL_EMBEDDING,
         contents=[pregunta],
@@ -26,20 +26,22 @@ def buscar_contexto(pregunta: str, top_k: int = 4):
     )
     query_vector = res_emb.embeddings[0].values
 
-    # Llamada a la función RPC match_normativa creada en PostgreSQL
-    respuesta = supabase.rpc("match_normativa", {
+    # Búsqueda estrictamente restringida a la colección temática solicitada
+    respuesta = supabase.rpc("match_normativa_coleccion", {
         "query_embedding": query_vector,
+        "p_coleccion_id": coleccion_id,
         "match_threshold": 0.35,
         "match_count": top_k
     }).execute()
 
     return respuesta.data
 
-def responder_consulta(pregunta: str):
+def responder_consulta(pregunta: str, coleccion_id: str):
     print(f"\n[*] Pregunta: {pregunta}")
+    print(f"[*] Colección: {coleccion_id}")
     print("[*] Buscando fragmentos normativos relevantes en Supabase...")
-    
-    docs = buscar_contexto(pregunta)
+
+    docs = buscar_contexto(pregunta, coleccion_id)
     
     if not docs:
         print("[!] No se encontraron fragmentos normativos con suficiente similitud.")
@@ -69,10 +71,11 @@ PREGUNTA DEL USUARIO:
 
 RESPUESTA FUNDAMENTADA:"""
 
-    print("\n[*] Generando respuesta con Gemini...")
+    print("\n[*] Generando respuesta con Gemini (temperature=0.0)...")
     res_llm = ai_client.models.generate_content(
         model=MODEL_GENERACION,
-        contents=prompt_instruccion
+        contents=prompt_instruccion,
+        config=types.GenerateContentConfig(temperature=0.0)
     )
     
     print("\n" + "="*70)
@@ -82,10 +85,13 @@ RESPUESTA FUNDAMENTADA:"""
     print("="*70 + "\n")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        consulta = " ".join(sys.argv[1:])
+    # Uso: python scripts/query_rag.py <coleccion_id> <pregunta...>
+    if len(sys.argv) > 2:
+        coleccion_id = sys.argv[1]
+        consulta = " ".join(sys.argv[2:])
     else:
-        # Pregunta de prueba predeterminada
-        consulta = "¿Qué establece la normativa respecto a las facultades de la ASFI y la Constitución Política del Estado?"
-    
-    responder_consulta(consulta)
+        coleccion_id = "bancaria_asfi_bolivia"
+        consulta = ("¿Qué establece la normativa respecto a las facultades de la ASFI "
+                    "y la Constitución Política del Estado?")
+
+    responder_consulta(consulta, coleccion_id)

@@ -1,0 +1,63 @@
+services:
+  backend:
+    build: .
+    container_name: rag_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    depends_on:
+      - web_ingest
+
+  web_ingest:
+    build: .
+    container_name: rag_web_ingest
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    command: uvicorn web_ingest:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - .:/app
+
+  streamlit:
+    build: .
+    container_name: rag_streamlit
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      API_URL: http://backend:8000/api/consultar
+    command: streamlit run app_streamlit.py --server.address=0.0.0.0 --server.port=8501
+    volumes:
+      - .:/app
+    depends_on:
+      - backend
+
+  # Base vectorial local opcional para validar el DDL sin tocar Supabase:
+  #   docker compose --profile local-db up --build
+  # (las apps usan Supabase definido en .env; este servicio replica el esquema)
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: rag_postgres
+    profiles: ["local-db"]
+    environment:
+      POSTGRES_PASSWORD: rag_local
+      POSTGRES_DB: rag
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./scripts/setup_database.sql:/docker-entrypoint-initdb.d/01_setup.sql:ro
+      - rag_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rag_pg_data:
