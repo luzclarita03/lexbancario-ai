@@ -39,8 +39,9 @@ class Informe(FPDF):
     def footer(self) -> None:
         self.set_y(-12)
         self.set_font("DejaVu", "", 8)
-        self.set_text_color(120)
+        self.set_text_color(0, 102, 204)
         self.cell(0, 4, REPO_URL, align="C", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
+        self.set_text_color(120)
         self.cell(0, 4, f"Pagina {self.page_no()}/{{nb}}", align="C")
         self.set_text_color(0)
 
@@ -85,7 +86,9 @@ def build() -> str:
     pdf.multi_cell(0, 5, "Sistemas Paralelos y Distribuidos - Informe de Rendimiento", align="C")
     pdf.ln(1)
     pdf.set_font("DejaVu", "", 9.5)
+    pdf.set_text_color(0, 102, 204)
     pdf.cell(0, 5, f"Repositorio: {REPO_URL}", align="C", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_text_color(0)
     pdf.ln(4)
 
     h2(pdf, "1. Arquitectura y concurrencia")
@@ -267,7 +270,9 @@ def build() -> str:
     )
     pdf.set_font("DejaVu", "", 9)
     pdf.ln(1)
+    pdf.set_text_color(0, 102, 204)
     pdf.cell(0, 5, f"Repositorio del proyecto: {REPO_URL}", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_text_color(0)
 
     out = "INFORME_RENDIMIENTO.pdf"
     pdf.output(out)
