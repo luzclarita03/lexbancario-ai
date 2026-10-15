@@ -15,6 +15,7 @@ from fpdf import FPDF
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "resultados"
+REPO_URL = "https://github.com/luzclarita03/lexbancario-ai"
 
 API_REAL = [(1, 156.01, 1.000, 1.000), (2, 122.57, 1.273, 0.636)]
 
@@ -39,7 +40,8 @@ class Informe(FPDF):
         self.set_y(-12)
         self.set_font("DejaVu", "", 8)
         self.set_text_color(120)
-        self.cell(0, 6, f"Pagina {self.page_no()}/{{nb}}", align="C")
+        self.cell(0, 4, REPO_URL, align="C", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 4, f"Pagina {self.page_no()}/{{nb}}", align="C")
         self.set_text_color(0)
 
 
@@ -81,6 +83,9 @@ def build() -> str:
     pdf.ln(1)
     pdf.set_font("DejaVu", "", 10)
     pdf.multi_cell(0, 5, "Sistemas Paralelos y Distribuidos - Informe de Rendimiento", align="C")
+    pdf.ln(1)
+    pdf.set_font("DejaVu", "", 9.5)
+    pdf.cell(0, 5, f"Repositorio: {REPO_URL}", align="C", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
     pdf.ln(4)
 
     h2(pdf, "1. Arquitectura y concurrencia")
@@ -260,6 +265,9 @@ def build() -> str:
         "python benchmark.py --embed-mode mock  --workers 1,2,4,8\n"
         "python scripts/graficar.py && python scripts/generar_informe.py",
     )
+    pdf.set_font("DejaVu", "", 9)
+    pdf.ln(1)
+    pdf.cell(0, 5, f"Repositorio del proyecto: {REPO_URL}", link=REPO_URL, new_x="LMARGIN", new_y="NEXT")
 
     out = "INFORME_RENDIMIENTO.pdf"
     pdf.output(out)
